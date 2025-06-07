@@ -36,7 +36,8 @@ class UserService {
     }
   }
 
-  static Future<void> addLikeToUser(String targetUserId, String currentUserId) async {
+  static Future<void> addLikeToUser(
+      String targetUserId, String currentUserId) async {
     final url =
         'https://6842c522e1347494c31de2fd.mockapi.io/api/v1/users/$targetUserId';
 
@@ -52,6 +53,35 @@ class UserService {
       likedBy.add(currentUserId);
 
       // PATCH ke MockAPI
+      final patchResponse = await http.put(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'likedBy': likedBy}),
+      );
+
+      if (patchResponse.statusCode != 200) {
+        throw Exception("Failed to update likedBy");
+      }
+    }
+  }
+
+  static Future<void> removeLikeFromUser(
+      String? targetUserId, String currentUserId) async {
+    final url =
+        'https://6842c522e1347494c31de2fd.mockapi.io/api/v1/users/$targetUserId';
+
+    // Fetch the target user first
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) throw Exception("Failed to fetch user");
+
+    final data = json.decode(response.body);
+    List<String> likedBy = List<String>.from(data['likedBy'] ?? []);
+
+    // Remove like if exists
+    if (likedBy.contains(currentUserId)) {
+      likedBy.remove(currentUserId);
+
+      // PATCH to MockAPI
       final patchResponse = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},

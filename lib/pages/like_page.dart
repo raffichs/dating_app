@@ -113,8 +113,15 @@ class _LikePageState extends State<LikePage> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.close, color: Colors.red),
-                              onPressed: () {
-                                // TODO: skip this user
+                              onPressed: () async {
+                                // Remove this user's id from current user's likedBy list
+                                setState(() {
+                                  likedYouUsers.removeAt(index);
+                                });
+                                if (currentUserId != null) {
+                                  await UserService.removeLikeFromUser(
+                                      user.id, currentUserId!);
+                                }
                               },
                             ),
                             IconButton(
@@ -122,8 +129,14 @@ class _LikePageState extends State<LikePage> {
                                   color: Colors.green),
                               onPressed: () async {
                                 // simulasi
-                                await showMatchNotification(
-                                    user.username); // tampilkan notif
+                                await showMatchNotification(user.username);
+                                setState(() {
+                                  likedYouUsers.removeAt(index);
+                                });
+                                if (currentUserId != null) {
+                                  await UserService.removeLikeFromUser(
+                                      user.id, currentUserId!);
+                                } // tampilkan notif
                               },
                             ),
                           ],
